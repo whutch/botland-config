@@ -1,0 +1,48 @@
+// Hunter
+// Bot configuration for Bot Land (http://bot.land)
+// :version: 1.2
+// :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
+
+// Suggested hardware: missiles 3, cloak 2, shield 2
+
+
+update = function () {
+    if (!direction) {
+        direction = "left";
+    }
+    if (!starting_life) {
+        starting_life = life;
+    }
+    if (life < starting_life) {
+        if (canCloak()) {
+            cloak();
+        }
+        if (!isCloaked() && canShield()) {
+            shield();
+        }
+    }
+    found = findClosestEnemyBot();
+    if (exists(found)) {
+        if (willMissilesHit(found)) {
+            if (canCloak()) {
+                cloak();
+            }
+            if (!isCloaked() && canShield()) {
+                shield();
+            }
+            fireMissiles(found);
+        }
+        pursue(found);
+    }
+    if (!canMove(direction)) {
+        direction = next_direction(direction)
+    }
+    move(direction);
+};
+
+next_direction = function(direction) {
+    if (direction == "left") return "up";
+    if (direction == "up") return "right";
+    if (direction == "right") return "down";
+    if (direction == "down") return "left";
+};
