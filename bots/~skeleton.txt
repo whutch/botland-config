@@ -1,0 +1,38 @@
+// Skeleton
+// Bot configuration for Bot Land (http://bot.land)
+// :version: 0.1
+// :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
+
+// Suggested hardware: 
+
+
+init = function () {
+    direction = "left";
+    last_life = life;
+}
+
+update = function () {
+    if (life < last_life) {
+        last_life = life;
+        defend();
+    }
+    
+    if (!canMove(direction)) {
+        direction = next_direction(direction)
+    }
+    move(direction);
+}
+
+defend = function() {
+    if (isShielded() || isCloaked() || isReflecting()) return;
+    if (canShield()) shield();
+    if (canCloak()) cloak();
+    if (canReflect()) reflect();
+}
+
+next_direction = function(direction) {
+    if (direction == "left") return "up";
+    if (direction == "up") return "right";
+    if (direction == "right") return "down";
+    if (direction == "down") return "left";
+};
