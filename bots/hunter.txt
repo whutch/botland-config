@@ -1,6 +1,6 @@
 // Hunter
 // Bot configuration for Bot Land (http://bot.land)
-// :version: 2.3
+// :version: 2.4
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
 // Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
@@ -13,32 +13,24 @@ init = function() {
     mines = false;
     close_distance = 0;
     reveal_turns = 5;
+    always_defend = 40;
     // status
+    enemy = null;
     direction = "left";
     last_life = life;
     next_reveal = 0;
 }
 
 update = function () {
-    if (life < last_life) {
-        last_life = life;
-        defend();
-    }
-    enemy = findClosestEnemyBot();
-    if (exists(enemy) && canSense(enemy)) {
-        if (fight && (!close_distance || getDistanceTo(enemy) <= close_distance)) {
-            if (willLasersHit(enemy)) {
-                fireLasers(enemy);
-            }
-            if (willMissilesHit(enemy)) {
-                fireMissiles(enemy);
-            }
-            if (willArtilleryHit()) {
-                fireArtillery();
-            }
+    check_defend();
+    if (!enemy || !check_enemy(enemy))
+        enemy = findClosestEnemyBot();
+    if (enemy && canSense(enemy)) {
+        if (fight && check_distance()) {
+            try_attacking();
         }
         check_environment();
-        pursue(enemy);
+        try_pursue();
     } else {
         check_environment();
         if (!canMove(direction)) {
@@ -48,11 +40,29 @@ update = function () {
     }
 };
 
-defend = function() {
-    if (isShielded() || isCloaked() || isReflecting()) return;
-    if (canShield()) shield();
-    if (canCloak()) cloak();
-    if (canReflect()) reflect();
+check_defend = function() {
+    if (life < last_life || life <= (life * (always_defend / 100))) {
+        last_life = life;
+        if (isShielded() || isCloaked() || isReflecting()) return;
+        if (canShield()) shield();
+        if (canCloak()) cloak();
+        if (canReflect()) reflect();
+    }
+}
+
+check_enemy = function() {
+    if (!exists(enemy) || !canSense(enemy))
+        return false;
+    if (canZap() && !isZapping() && isAdjacent(enemy)) return true;
+    if (willMeleeHit(enemy)) return true;
+    if (willLasersHit(enemy)) return true;
+    if (willMissilesHit(enemy)) return true;
+    if (willArtilleryHit(enemy)) return true;
+    return false;
+}
+
+check_distance = function() {
+    return (!close_distance || getDistanceTo(enemy) <= close_distance);
 }
 
 check_environment = function() {
@@ -65,6 +75,19 @@ check_environment = function() {
             next_reveal -= 1;
         }
     }
+}
+
+try_attacking = function() {
+    if (canZap() && !isZapping() && isAdjacent(enemy)) zap();
+    if (willMeleeHit(enemy)) melee(enemy);
+    if (willLasersHit(enemy)) fireLasers(enemy);
+    if (willMissilesHit(enemy)) fireMissiles(enemy);
+    if (willArtilleryHit(enemy)) fireArtillery(enemy);
+}
+
+try_pursue = function() {
+    if (canTeleport(entity)) teleport(entity);
+    pursue(enemy);
 }
 
 next_direction = function(direction) {
