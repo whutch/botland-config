@@ -1,6 +1,6 @@
 // Hunter
 // Bot configuration for Bot Land (http://bot.land)
-// :version: 2.5
+// :version: 2.6
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
 // Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
@@ -11,12 +11,15 @@ init = function() {
     use_weapons = true;  // Whether to use weapons (duh)
     use_sensors = false;  // Increases visibility but costs you a turn every ~8 turns
     avoid_mines = false;  // This doesn't work yet (the bot will reveal mines, but still walk into them)
+    avoid_enemies = false;  // Whether to completely avoid enemies
+    min_fight_distance = 0;  // If not zero, move away to given distance
     max_fight_distance = 0;  // If not zero, move in to given distance
     reveal_turns = 5;  // Number of turns between revealing mines (ignored if not avoiding mines)
     always_defend = 40;  // Percentage of health to always defend at (regardless of visible enemies)
     // Bot status
     is_red = (x > arenaWidth / 2);
     enemy = null;
+    enemy_distance = 0;
     if (is_red) direction = "left";
     else direction = "right";
     last_life = life;
@@ -25,14 +28,15 @@ init = function() {
 
 update = function () {
     check_defend();
+    if (canLayMine()) layMine();
     if (!enemy || !check_enemy(enemy))
         enemy = findClosestEnemyBot();
     if (enemy && canSense(enemy)) {
-        if (use_weapons && check_distance()) {
+        if (!avoid_enemies && use_weapons && check_distance()) {
             try_attacking();
         }
         check_environment();
-        try_pursue();
+        try_moving();
     } else {
         check_environment();
         if (!canMove(direction)) {
@@ -55,6 +59,7 @@ check_defend = function() {
 check_enemy = function() {
     if (!exists(enemy) || !canSense(enemy))
         return false;
+    if (canTeleport(entity)) return true;
     if (canZap() && !isZapping() && isAdjacent(enemy)) return true;
     if (willMeleeHit(enemy)) return true;
     if (willLasersHit(enemy)) return true;
@@ -64,7 +69,11 @@ check_enemy = function() {
 }
 
 check_distance = function() {
-    return (!max_fight_distance || getDistanceTo(enemy) <= max_fight_distance);
+    enemy_distance = getDistanceTo(enemy)
+    if (!min_fight_distance || enemy_distance >= min_fight_distance)
+        return true;
+    if (!max_fight_distance || enemy_distance <= max_fight_distance)
+        return true;
 }
 
 check_environment = function() {
@@ -87,8 +96,16 @@ try_attacking = function() {
     if (willArtilleryHit(enemy)) fireArtillery(enemy);
 }
 
-try_pursue = function() {
-    if (canTeleport(enemy) && getDistanceTo(enemy) >= 2) teleport(enemy);
+try_moving = function() {
+    if (avoid_enemies || (min_fight_distance && enemy_distance < min_fight_distance)) {
+        // Run awaaaaaay!
+        if (enemy.y > y && canMove("up")) move("up");
+        if (enemy.y < y && canMove("down")) move("down");
+        if (enemy.x > x && canMove("left")) move("left");
+        move("right");
+    }
+    // Charge!
+    if (canTeleport(enemy) && enemy_distance >= 2) teleport(enemy);
     pursue(enemy);
 }
 
