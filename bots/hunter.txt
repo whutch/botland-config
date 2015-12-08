@@ -8,9 +8,9 @@
 
 init = function() {
     // const
-    fight = true;
-    sensors = false;
-    mines = false;
+    use_weapons = true;
+    use_sensors = false;
+    avoid_mines = false;
     close_distance = 0;
     reveal_turns = 5;
     always_defend = 40;
@@ -26,7 +26,7 @@ update = function () {
     if (!enemy || !check_enemy(enemy))
         enemy = findClosestEnemyBot();
     if (enemy && canSense(enemy)) {
-        if (fight && check_distance()) {
+        if (use_weapons && check_distance()) {
             try_attacking();
         }
         check_environment();
@@ -66,8 +66,8 @@ check_distance = function() {
 }
 
 check_environment = function() {
-    if (sensors && canActivateSensors() && !areSensorsActivated()) activateSensors();
-    if (mines) {
+    if (use_sensors && canActivateSensors() && !areSensorsActivated()) activateSensors();
+    if (avoid_mines) {
         if (next_reveal <= 0) {
             next_reveal = reveal_turns;
             revealMines();
