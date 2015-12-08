@@ -88,7 +88,7 @@ try_attacking = function() {
 }
 
 try_pursue = function() {
-    if (canTeleport(entity) && getDistanceTo(enemy) >= 2) teleport(entity);
+    if (canTeleport(enemy) && getDistanceTo(enemy) >= 2) teleport(enemy);
     pursue(enemy);
 }
 
