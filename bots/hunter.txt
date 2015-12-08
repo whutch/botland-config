@@ -1,6 +1,6 @@
 // Hunter
 // Bot configuration for Bot Land (http://bot.land)
-// :version: 2.4
+// :version: 2.5
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
 // Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
@@ -15,8 +15,10 @@ init = function() {
     reveal_turns = 5;
     always_defend = 40;
     // status
+    is_red = (x > arenaWidth / 2);
     enemy = null;
-    direction = "left";
+    if (is_red) direction = "left";
+    else direction = "right";
     last_life = life;
     next_reveal = 0;
 }
@@ -41,7 +43,7 @@ update = function () {
 };
 
 check_defend = function() {
-    if (life < last_life || life <= (life * (always_defend / 100))) {
+    if (enemy || life < last_life || life <= (life * (always_defend / 100))) {
         last_life = life;
         if (isShielded() || isCloaked() || isReflecting()) return;
         if (canShield()) shield();
@@ -86,13 +88,17 @@ try_attacking = function() {
 }
 
 try_pursue = function() {
-    if (canTeleport(entity)) teleport(entity);
+    if (canTeleport(entity) && getDistanceTo(enemy) >= 2) teleport(entity);
     pursue(enemy);
 }
 
 next_direction = function(direction) {
-    if (direction == "left") return "up";
-    if (direction == "up") return "right";
-    if (direction == "right") return "down";
-    if (direction == "down") return "left";
+    if (direction == "left")
+        if (is_red) return "up"; else return "down";
+    if (direction == "up")
+        if (is_red) return "right"; else return "left";
+    if (direction == "right")
+        if (is_red) return "down"; else return "up";
+    if (direction == "down")
+        if (is_red) return "left"; else return "right";
 };
