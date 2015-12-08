@@ -1,6 +1,6 @@
 // Hunter
 // Bot configuration for Bot Land (http://bot.land)
-// :version: 2.1
+// :version: 2.3
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
 // Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
@@ -9,9 +9,14 @@
 init = function() {
     // const
     fight = true;
+    sensors = false;
+    mines = false;
+    close_distance = 0;
+    reveal_turns = 5;
     // status
     direction = "left";
     last_life = life;
+    next_reveal = 0;
 }
 
 update = function () {
@@ -21,7 +26,7 @@ update = function () {
     }
     enemy = findClosestEnemyBot();
     if (exists(enemy) && canSense(enemy)) {
-        if (fight) {
+        if (fight && (!close_distance || getDistanceTo(enemy) <= close_distance)) {
             if (willLasersHit(enemy)) {
                 fireLasers(enemy);
             }
@@ -32,8 +37,10 @@ update = function () {
                 fireArtillery();
             }
         }
+        check_environment();
         pursue(enemy);
     } else {
+        check_environment();
         if (!canMove(direction)) {
             direction = next_direction(direction)
         }
@@ -46,6 +53,18 @@ defend = function() {
     if (canShield()) shield();
     if (canCloak()) cloak();
     if (canReflect()) reflect();
+}
+
+check_environment = function() {
+    if (sensors && canActivateSensors() && !areSensorsActivated()) activateSensors();
+    if (mines) {
+        if (next_reveal <= 0) {
+            next_reveal = reveal_turns;
+            revealMines();
+        } else {
+            next_reveal -= 1;
+        }
+    }
 }
 
 next_direction = function(direction) {
