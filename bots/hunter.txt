@@ -7,14 +7,14 @@
 
 
 init = function() {
-    // const
-    use_weapons = true;
-    use_sensors = false;
-    avoid_mines = false;
-    close_distance = 0;
-    reveal_turns = 5;
-    always_defend = 40;
-    // status
+    // Options
+    use_weapons = true;  // Whether to use weapons (duh)
+    use_sensors = false;  // Increases visibility but costs you a turn every ~8 turns
+    avoid_mines = false;  // This doesn't work yet (the bot will reveal mines, but still walk into them)
+    max_fight_distance = 0;  // If not zero, move in to given distance
+    reveal_turns = 5;  // Number of turns between revealing mines (ignored if not avoiding mines)
+    always_defend = 40;  // Percentage of health to always defend at (regardless of visible enemies)
+    // Bot status
     is_red = (x > arenaWidth / 2);
     enemy = null;
     if (is_red) direction = "left";
@@ -36,7 +36,7 @@ update = function () {
     } else {
         check_environment();
         if (!canMove(direction)) {
-            direction = next_direction(direction)
+            direction = next_direction(direction);
         }
         move(direction);
     }
@@ -64,7 +64,7 @@ check_enemy = function() {
 }
 
 check_distance = function() {
-    return (!close_distance || getDistanceTo(enemy) <= close_distance);
+    return (!max_fight_distance || getDistanceTo(enemy) <= max_fight_distance);
 }
 
 check_environment = function() {
