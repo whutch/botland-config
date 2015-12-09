@@ -3,8 +3,6 @@
 // :version: 3.0
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
-// Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
-
 
 init = function() {
     // Options
