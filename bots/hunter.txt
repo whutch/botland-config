@@ -26,22 +26,21 @@ init = function() {
     next_reveal = 0;
 }
 
-update = function () {
+update = function() {
     check_defend();
-    if (canLayMine()) layMine();
+    if (canLayMine())
+        layMine();
     if (!enemy || !check_enemy(enemy))
         enemy = findClosestEnemyBot();
     if (enemy && canSense(enemy)) {
-        if (!avoid_enemies && use_weapons && check_distance()) {
+        if (!avoid_enemies && use_weapons && check_distance())
             try_attacking();
-        }
         check_environment();
         try_moving();
     } else {
         check_environment();
-        if (!canMove(direction)) {
+        if (!canMove(direction))
             direction = next_direction(direction);
-        }
         move(direction);
     }
 };
@@ -57,8 +56,7 @@ check_defend = function() {
 }
 
 check_enemy = function() {
-    if (!exists(enemy) || !canSense(enemy))
-        return false;
+    if (!exists(enemy) || !canSense(enemy)) return false;
     if (canTeleport(entity)) return true;
     if (canZap() && !isZapping() && isAdjacent(enemy)) return true;
     if (willMeleeHit(enemy)) return true;
@@ -70,10 +68,8 @@ check_enemy = function() {
 
 check_distance = function() {
     enemy_distance = getDistanceTo(enemy)
-    if (!min_fight_distance || enemy_distance >= min_fight_distance)
-        return true;
-    if (!max_fight_distance || enemy_distance <= max_fight_distance)
-        return true;
+    if (!min_fight_distance || enemy_distance >= min_fight_distance) return true;
+    if (!max_fight_distance || enemy_distance <= max_fight_distance) return true;
 }
 
 check_environment = function() {
@@ -82,14 +78,14 @@ check_environment = function() {
         if (next_reveal <= 0) {
             next_reveal = reveal_turns;
             revealMines();
-        } else {
-            next_reveal -= 1;
         }
+        else
+            next_reveal -= 1;
     }
 }
 
 try_attacking = function() {
-    if (canZap() && !isZapping() && isAdjacent(enemy)) zap();
+    if (canZap() && isAdjacent(enemy)) zap();
     if (willMeleeHit(enemy)) melee(enemy);
     if (willLasersHit(enemy)) fireLasers(enemy);
     if (willMissilesHit(enemy)) fireMissiles(enemy);
