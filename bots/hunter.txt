@@ -24,7 +24,7 @@ init = function() {
     else direction = "right";
     last_life = life;
     next_reveal = 0;
-}
+};
 
 update = function() {
     check_defend();
@@ -53,7 +53,7 @@ check_defend = function() {
         if (canCloak()) cloak();
         if (canReflect()) reflect();
     }
-}
+};
 
 check_enemy = function() {
     if (!exists(enemy) || !canSense(enemy)) return false;
@@ -64,13 +64,13 @@ check_enemy = function() {
     if (willMissilesHit(enemy)) return true;
     if (willArtilleryHit(enemy)) return true;
     return false;
-}
+};
 
 check_distance = function() {
-    enemy_distance = getDistanceTo(enemy)
+    enemy_distance = getDistanceTo(enemy);
     if (!min_fight_distance || enemy_distance >= min_fight_distance) return true;
     if (!max_fight_distance || enemy_distance <= max_fight_distance) return true;
-}
+};
 
 check_environment = function() {
     if (use_sensors && canActivateSensors() && !areSensorsActivated()) activateSensors();
@@ -82,7 +82,7 @@ check_environment = function() {
         else
             next_reveal -= 1;
     }
-}
+};
 
 try_attacking = function() {
     if (canZap() && isAdjacent(enemy)) zap();
@@ -90,7 +90,7 @@ try_attacking = function() {
     if (willLasersHit(enemy)) fireLasers(enemy);
     if (willMissilesHit(enemy)) fireMissiles(enemy);
     if (willArtilleryHit(enemy)) fireArtillery(enemy);
-}
+};
 
 try_moving = function() {
     if (avoid_enemies || (min_fight_distance && enemy_distance < min_fight_distance)) {
@@ -103,7 +103,7 @@ try_moving = function() {
     // Charge!
     if (canTeleport(enemy) && enemy_distance >= 2) teleport(enemy);
     pursue(enemy);
-}
+};
 
 next_direction = function(direction) {
     if (direction == "left")
