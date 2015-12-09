@@ -1,6 +1,6 @@
 // Hunter
 // Bot configuration for Bot Land (http://bot.land)
-// :version: 2.6
+// :version: 2.7
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
 // Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
@@ -12,6 +12,7 @@ init = function() {
     use_sensors = false;  // Increases visibility but costs you a turn every ~8 turns
     avoid_mines = false;  // This doesn't work yet (the bot will reveal mines, but still walk into them)
     avoid_enemies = false;  // Whether to completely avoid enemies
+    alternate_moves = false;  // Whether to move at least every other turn (useful for avoiding artillery)
     min_fight_distance = 0;  // If not zero, move away to given distance
     max_fight_distance = 0;  // If not zero, move in to given distance
     reveal_turns = 5;  // Number of turns between revealing mines (ignored if not avoiding mines)
@@ -24,23 +25,29 @@ init = function() {
     else direction = "right";
     last_life = life;
     next_reveal = 0;
+    moved_last_turn = false;
+    moving = false;
 };
 
 update = function() {
+    moved_last_turn = moving;
+    moving = false;
     check_defend();
     if (canLayMine())
         layMine();
     if (!enemy || !check_enemy(enemy))
         enemy = findClosestEnemyBot();
     if (enemy && canSense(enemy)) {
-        if (!avoid_enemies && use_weapons && check_distance())
+        if (!avoid_enemies && use_weapons && check_distance() && (!alternate_moves || moved_last_turn))
             try_attacking();
         check_environment();
+        moving = true;
         try_moving();
     } else {
         check_environment();
         if (!canMove(direction))
             direction = next_direction(direction);
+        moving = true;
         move(direction);
     }
 };
@@ -100,6 +107,8 @@ try_moving = function() {
         if (enemy.x > x && canMove("left")) move("left");
         move("right");
     }
+    if (alternate_moves && !moved_last_turn && isAdjacent(enemy))
+        move();
     // Charge!
     if (canTeleport(enemy) && enemy_distance >= 2) teleport(enemy);
     pursue(enemy);
