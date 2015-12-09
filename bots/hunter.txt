@@ -1,6 +1,6 @@
 // Hunter
 // Bot configuration for Bot Land (http://bot.land)
-// :version: 2.7
+// :version: 3.0
 // :license: MIT (https://github.com/whutch/botland-config/blob/master/LICENSE.txt)
 
 // Suggested hardware: missiles 3, cloak 2, shield 1, reflect 1
@@ -21,12 +21,15 @@ init = function() {
     is_red = (x > arenaWidth / 2);
     enemy = null;
     enemy_distance = 0;
-    if (is_red) direction = "left";
-    else direction = "right";
     last_life = life;
     next_reveal = 0;
     moved_last_turn = false;
     moving = false;
+    // Pathing
+    distance_from_edge = 5;
+    calculate_path();
+    if (is_red) target_point = se_bound;
+    else target_point = nw_bound;
 };
 
 update = function() {
@@ -45,10 +48,10 @@ update = function() {
         try_moving();
     } else {
         check_environment();
-        if (!canMove(direction))
-            direction = next_direction(direction);
+        if (at_coord(target_point))
+            target_point = next_point();
         moving = true;
-        move(direction);
+        move_to_coord(target_point);
     }
 };
 
@@ -114,13 +117,23 @@ try_moving = function() {
     pursue(enemy);
 };
 
-next_direction = function(direction) {
-    if (direction == "left")
-        if (is_red) return "up"; else return "down";
-    if (direction == "up")
-        if (is_red) return "right"; else return "left";
-    if (direction == "right")
-        if (is_red) return "down"; else return "up";
-    if (direction == "down")
-        if (is_red) return "left"; else return "right";
+calculate_path = function() {
+    _d = distance_from_edge;
+    nw_bound = coord(_d, _d);
+    ne_bound = coord(arenaWidth - 1 - _d, _d);
+    se_bound = coord(arenaWidth - 1 - _d, arenaHeight - 1 - _d);
+    sw_bound = coord(_d, arenaHeight - 1 - _d);
 };
+
+next_point = function() {
+    if (target_point == nw_bound) return ne_bound;
+    if (target_point == ne_bound) return se_bound;
+    if (target_point == se_bound) return sw_bound;
+    if (target_point == sw_bound) return nw_bound;
+};
+
+coord = function(x_, y_) { return ((x_ << 6) | y_); };
+cx = function(coord) { return ((coord & 4032) >> 6); };
+cy = function(coord) { return (coord & 63); };
+at_coord = function(coord) { return (x == cx(coord) && y == cy(coord)); };
+move_to_coord = function(coord) { moveTo(cx(coord), cy(coord)); };
