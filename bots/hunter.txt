@@ -26,7 +26,7 @@ init = function() {
     moved_last_turn = false;
     moving = false;
     // Pathing
-    distance_from_edge = 5;
+    distance_from_edge = 3;
     calculate_path();
     if (is_red) target_point = se_bound;
     else target_point = nw_bound;
